@@ -4,7 +4,7 @@ const router = Router();
 
 
 
-Router.get("/health",(req, res)=> { 
+router.get("/health",(req, res)=> { 
     res.json({
         status:'ok',
         uptime:process.uptime()
