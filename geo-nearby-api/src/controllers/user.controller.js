@@ -1,6 +1,9 @@
+import prisma from "../prisma.js";
+
+
 let users = [];
 
-export const createUser = (req, res) => {
+export const createUser = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -9,20 +12,31 @@ export const createUser = (req, res) => {
     });
   }
 
-  const user = {
-    id: users.length + 1,
-    email
-  };
+  try {
+    const user = await prisma.user.create({
+      data: { email }
+    });
 
-  users.push(user);
+    res.status(201).json(user);
+  } catch (err) {
+    if (err.code === "P2002") {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+
+
 
   res.status(201).json(user);
 };
 
-export const getUserById = (req, res) => {
+export const getUserById = async (req, res) => {
   const id = Number(req.params.id);
 
-  const user = users.find(u => u.id === id);
+  const user = await prisma.user.findUnique({
+    where: { id }
+  });
+
 
   if (!user) {
     return res.status(404).json({
